@@ -111,7 +111,6 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 
 func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) (*proto.ScreeningResponse, error) {
 	hospcode := request.GetHospcode()
-	fmt.Print(hospcode)
 	db := database.DBConn
 	db.SingularTable(true)
 	screenings := []*proto.ScreeningResponse_Screening{}

@@ -11,9 +11,9 @@ message RequestHospcode {
 }
 
 message RequestPatient {
-  // string hn = 1;
-  // string vn = 2;
-  string hospcode = 1;
+  string hn = 1;
+  string vn = 2;
+  string hospcode = 3;
 }
 
 message InfoResponse {
