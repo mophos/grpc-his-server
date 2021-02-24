@@ -194,3 +194,40 @@ func (s *server) ClinicList(_ context.Context, request *proto.RequestHospcode) (
 		Results: data,
 	}, nil
 }
+
+func (s *server) GetProcedure(_ context.Context, request *proto.RequestPatient) (*proto.ProcedureResponse, error) {
+	hn := request.GetHn()
+	vn := request.GetVn()
+	hospcode := request.GetHospcode()
+	db := database.DBConn
+	db.SingularTable(true)
+	data := []*proto.ProcedureResponse_Procedure{}
+	res := db.Raw(`
+	SELECT
+		d.gw_record_id,
+		d.hn,
+		d.vn,
+		d.icd10,
+		d.vstdate,
+		d.vsttime,
+		h.hospname,
+		d.gw_hospcode,
+		i.diagename,
+		i.diagtname 
+	FROM
+		hosxpv3.hosxpv3_ovstdiag d
+		JOIN MASTER.b_hospitals AS h ON h.hospcode = d.gw_hospcode
+		LEFT JOIN MASTER.icd10 AS i ON i.diagcode = d.icd10
+		LEFT JOIN hosxpv3.hosxpv3_ovst AS o ON o.gw_hospcode = d.gw_hospcode 
+		AND o.hn = d.hn 
+		AND o.vn = d.vn 
+	WHERE
+		LEFT ( i.diagcode, 1 ) IN ( 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 )
+		AND d.gw_hospcode=? and d.hn=? and d.vn=?`, hospcode, hn, vn).Scan(&data)
+	if res.Error != nil {
+		fmt.Println(res.Error)
+	}
+	return &proto.ProcedureResponse{
+		Results: data,
+	}, nil
+}

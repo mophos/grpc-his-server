@@ -6,6 +6,8 @@ service EmrService {
   rpc PatientInfo(RequestCid) returns (InfoResponse) {}
   rpc GetServices(RequestCid) returns (ServiceResponse) {}
   rpc GetScreening(RequestPatient) returns (ScreeningResponse) {}
+  rpc GetDiagnosis(RequestPatient) returns (DiagnosisResponse) {}
+  rpc GetProcedure(RequestPatient) returns (ProcedureResponse) {}
 }
 
 service MasterService {
@@ -106,3 +108,17 @@ message ScreeningResponse {
   repeated Screening Results = 2;
 }
 
+message ProcedureResponse {
+  message Procedure {
+    string gw_record_id = 1;
+    string gw_hospcode = 2;
+    string hn = 3;
+    string vn = 4;
+    string vstdate = 5;
+    string vsttime = 6;
+    string hospname = 7;
+    string diagename = 8;
+    string diagtname = 9;
+  }
+  repeated Procedure Results = 2;
+}
