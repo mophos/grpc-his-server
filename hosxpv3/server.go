@@ -45,9 +45,10 @@ type Service struct {
 
 type Doctor struct {
 	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
-	Name       string `json:"name"`
-	LicenseNo  string `json:"licenseno"`
 	GwHospcode string `json:"gw_hospcode"`
+	Name       string `json:"name"`
+	Licenseno  string `json:"license_no"`
+	Cid        string `json:"cid"`
 }
 
 func initDatabase() {
@@ -118,10 +119,9 @@ func (s *server) DoctorList(_ context.Context, request *proto.RequestHospcode) (
 	db.SingularTable(true)
 
 	doctor := []*proto.DoctorResponse_Doctor{}
-
 	// res := db.Table("doctor").Where(&Doctor{GwHospcode: hospcode}).Find(&doctor)
 	res := db.Raw(`
-	select * from doctor
+	select gw_record_id,gw_hospcode,name,licenseno,cid from hosxpv3_doctor
 	where gw_hospcode=?`, hospcode).Scan(&doctor)
 
 	if res.Error != nil {

@@ -43,9 +43,10 @@ message ServiceResponse {
 message DoctorResponse {
   message Doctor {
     string gw_record_id = 1;
-    string name = 2;
-    string licenseNo = 3;
-    string cid= 4 ;
+    string gw_hospcode = 2;
+    string name = 3;
+    string licenseno = 4;
+    string cid= 5 ;
   }
   repeated Doctor Results = 2;
 }
