@@ -8,6 +8,7 @@ service EmrService {
   rpc GetScreening(RequestPatient) returns (ScreeningResponse) {}
   rpc GetDiagnosis(RequestPatient) returns (DiagnosisResponse) {}
   rpc GetProcedure(RequestPatient) returns (ProcedureResponse) {}
+  rpc GetLab(RequestPatient) returns (LabResponse) {}
 }
 
 service MasterService {
@@ -121,4 +122,21 @@ message ProcedureResponse {
     string diagtname = 9;
   }
   repeated Procedure Results = 2;
+}
+
+message LabResponse {
+  message Lab {
+    string gw_record_id = 1;
+    string gw_hospcode = 2;
+    string hn = 3;
+    string vn = 4;
+    string lab_items_code = 5;
+    string lab_items_name_ref = 6;
+    string lab_items_normal_value_ref = 7;
+    string hospname = 8;
+    string lab_items_name = 9;
+    string lab_items_unit = 10;
+    string lab_items_normal_value = 11;
+  }
+  repeated Lab Results = 2;
 }

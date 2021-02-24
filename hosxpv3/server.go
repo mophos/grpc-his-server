@@ -157,13 +157,13 @@ func (s *server) GetDiagnosis(_ context.Context, request *proto.RequestPatient) 
 	res := db.Raw(`
 	SELECT
 		d.gw_record_id,
+		d.gw_hospcode,
 		d.hn,
 		d.vn,
 		d.icd10,
 		d.vstdate,
 		d.vsttime,
 		h.hospname,
-		d.gw_hospcode,
 		i.diagename,
 		i.diagtname 
 	FROM
@@ -205,13 +205,13 @@ func (s *server) GetProcedure(_ context.Context, request *proto.RequestPatient) 
 	res := db.Raw(`
 	SELECT
 		d.gw_record_id,
+		d.gw_hospcode,
 		d.hn,
 		d.vn,
 		d.icd10,
 		d.vstdate,
 		d.vsttime,
 		h.hospname,
-		d.gw_hospcode,
 		i.diagename,
 		i.diagtname 
 	FROM
@@ -228,6 +228,42 @@ func (s *server) GetProcedure(_ context.Context, request *proto.RequestPatient) 
 		fmt.Println(res.Error)
 	}
 	return &proto.ProcedureResponse{
+		Results: data,
+	}, nil
+}
+
+func (s *server) GetLab(_ context.Context, request *proto.RequestPatient) (*proto.LabResponse, error) {
+	hn := request.GetHn()
+	vn := request.GetVn()
+	hospcode := request.GetHospcode()
+	db := database.DBConn
+	db.SingularTable(true)
+	data := []*proto.LabResponse_Lab{}
+	res := db.Raw(`
+	SELECT
+		lh.gw_record_id,
+		lh.gw_hospcode,
+		lh.hn,
+		lh.vn,
+		lo.lab_items_code,
+		lo.lab_items_name_ref,
+		lo.lab_items_normal_value_ref,
+		h.hospname,
+		li.lab_items_name,
+		li.lab_items_unit,
+		li.lab_items_normal_value
+	FROM
+		hosxpv3.hosxpv3_lab_head AS lh
+		LEFT JOIN hosxpv3.hosxpv3_lab_order AS lo ON lo.lab_order_number = lh.lab_order_number
+		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = lh.gw_hospcode
+		LEFT JOIN MASTER.b_lab_items AS li ON li.gw_hospcode = lh.gw_hospcode 
+		AND li.lab_items_code = lo.lab_items_code 
+	WHERE
+		lh.gw_hospcode=? and lh.hn=? and lh.vn=?`, hospcode, hn, vn).Scan(&data)
+	if res.Error != nil {
+		fmt.Println(res.Error)
+	}
+	return &proto.LabResponse{
 		Results: data,
 	}, nil
 }
