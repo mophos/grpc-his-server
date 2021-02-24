@@ -8,6 +8,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/joho/godotenv"
 	"github.com/siteslave/grpc-demo/database"
 	proto "github.com/siteslave/grpc-demo/proto"
 	"google.golang.org/grpc"
@@ -21,10 +22,14 @@ type server struct {
 
 func initDatabase() {
 	var err error
-	user := os.Getenv("USER")
-	pass := os.Getenv("PASS")
-
-	database.DBConn, err = gorm.Open("mysql", user+":"+pass+"@tcp(127.0.0.1:3309)/hosxpv3?charset=utf8&parseTime=True")
+	db_user := os.Getenv("DB_USERNAME")
+	db_pass := os.Getenv("DB_PASSWORD")
+	db_host := os.Getenv("DB_HOST")
+	db_port := os.Getenv("DB_PORT")
+	db_name := os.Getenv("DB_NAME")
+	// siteTitle := os.Getenv("SITE_TITLE")
+	// dbHost := os.Getenv("DB_HOST")
+	database.DBConn, err = gorm.Open("mysql", db_user+":"+db_pass+"@tcp("+db_host+":"+db_port+")/"+db_name+"?charset=utf8&parseTime=True")
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to connect database")
@@ -33,6 +38,11 @@ func initDatabase() {
 }
 
 func main() {
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Println("Error loading .env file")
+	}
 
 	initDatabase()
 	defer database.DBConn.Close()
