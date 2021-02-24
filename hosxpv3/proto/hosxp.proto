@@ -46,10 +46,14 @@ message DoctorResponse {
     string licenseNo = 2;
     string cid= 3 ;
   }
+  repeated Doctor Results = 2;
 }
 
 service EmrService {
   rpc PatientInfo(RequestCid) returns (InfoResponse) {}
   rpc GetServices(RequestCid) returns (ServiceResponse) {}
+}
+
+service DoctorService {
   rpc DoctorList(RequestHospcode) returns (DoctorResponse) {}
 }

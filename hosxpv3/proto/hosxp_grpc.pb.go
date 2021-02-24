@@ -18,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EmrServiceClient interface {
-	PatientInfo(ctx context.Context, in *Request, opts ...grpc.CallOption) (*InfoResponse, error)
-	GetServices(ctx context.Context, in *Request, opts ...grpc.CallOption) (*ServiceResponse, error)
+	PatientInfo(ctx context.Context, in *RequestCid, opts ...grpc.CallOption) (*InfoResponse, error)
+	GetServices(ctx context.Context, in *RequestCid, opts ...grpc.CallOption) (*ServiceResponse, error)
 }
 
 type emrServiceClient struct {
@@ -30,7 +30,7 @@ func NewEmrServiceClient(cc grpc.ClientConnInterface) EmrServiceClient {
 	return &emrServiceClient{cc}
 }
 
-func (c *emrServiceClient) PatientInfo(ctx context.Context, in *Request, opts ...grpc.CallOption) (*InfoResponse, error) {
+func (c *emrServiceClient) PatientInfo(ctx context.Context, in *RequestCid, opts ...grpc.CallOption) (*InfoResponse, error) {
 	out := new(InfoResponse)
 	err := c.cc.Invoke(ctx, "/proto.EmrService/PatientInfo", in, out, opts...)
 	if err != nil {
@@ -39,7 +39,7 @@ func (c *emrServiceClient) PatientInfo(ctx context.Context, in *Request, opts ..
 	return out, nil
 }
 
-func (c *emrServiceClient) GetServices(ctx context.Context, in *Request, opts ...grpc.CallOption) (*ServiceResponse, error) {
+func (c *emrServiceClient) GetServices(ctx context.Context, in *RequestCid, opts ...grpc.CallOption) (*ServiceResponse, error) {
 	out := new(ServiceResponse)
 	err := c.cc.Invoke(ctx, "/proto.EmrService/GetServices", in, out, opts...)
 	if err != nil {
@@ -52,8 +52,8 @@ func (c *emrServiceClient) GetServices(ctx context.Context, in *Request, opts ..
 // All implementations must embed UnimplementedEmrServiceServer
 // for forward compatibility
 type EmrServiceServer interface {
-	PatientInfo(context.Context, *Request) (*InfoResponse, error)
-	GetServices(context.Context, *Request) (*ServiceResponse, error)
+	PatientInfo(context.Context, *RequestCid) (*InfoResponse, error)
+	GetServices(context.Context, *RequestCid) (*ServiceResponse, error)
 	mustEmbedUnimplementedEmrServiceServer()
 }
 
@@ -61,10 +61,10 @@ type EmrServiceServer interface {
 type UnimplementedEmrServiceServer struct {
 }
 
-func (UnimplementedEmrServiceServer) PatientInfo(context.Context, *Request) (*InfoResponse, error) {
+func (UnimplementedEmrServiceServer) PatientInfo(context.Context, *RequestCid) (*InfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PatientInfo not implemented")
 }
-func (UnimplementedEmrServiceServer) GetServices(context.Context, *Request) (*ServiceResponse, error) {
+func (UnimplementedEmrServiceServer) GetServices(context.Context, *RequestCid) (*ServiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetServices not implemented")
 }
 func (UnimplementedEmrServiceServer) mustEmbedUnimplementedEmrServiceServer() {}
@@ -81,7 +81,7 @@ func RegisterEmrServiceServer(s grpc.ServiceRegistrar, srv EmrServiceServer) {
 }
 
 func _EmrService_PatientInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+	in := new(RequestCid)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -93,13 +93,13 @@ func _EmrService_PatientInfo_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/proto.EmrService/PatientInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EmrServiceServer).PatientInfo(ctx, req.(*Request))
+		return srv.(EmrServiceServer).PatientInfo(ctx, req.(*RequestCid))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _EmrService_GetServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+	in := new(RequestCid)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func _EmrService_GetServices_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/proto.EmrService/GetServices",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EmrServiceServer).GetServices(ctx, req.(*Request))
+		return srv.(EmrServiceServer).GetServices(ctx, req.(*RequestCid))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -130,6 +130,92 @@ var EmrService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetServices",
 			Handler:    _EmrService_GetServices_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "proto/hosxp.proto",
+}
+
+// DoctorServiceClient is the client API for DoctorService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type DoctorServiceClient interface {
+	DoctorList(ctx context.Context, in *RequestHospcode, opts ...grpc.CallOption) (*DoctorResponse, error)
+}
+
+type doctorServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewDoctorServiceClient(cc grpc.ClientConnInterface) DoctorServiceClient {
+	return &doctorServiceClient{cc}
+}
+
+func (c *doctorServiceClient) DoctorList(ctx context.Context, in *RequestHospcode, opts ...grpc.CallOption) (*DoctorResponse, error) {
+	out := new(DoctorResponse)
+	err := c.cc.Invoke(ctx, "/proto.DoctorService/DoctorList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// DoctorServiceServer is the server API for DoctorService service.
+// All implementations must embed UnimplementedDoctorServiceServer
+// for forward compatibility
+type DoctorServiceServer interface {
+	DoctorList(context.Context, *RequestHospcode) (*DoctorResponse, error)
+	mustEmbedUnimplementedDoctorServiceServer()
+}
+
+// UnimplementedDoctorServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedDoctorServiceServer struct {
+}
+
+func (UnimplementedDoctorServiceServer) DoctorList(context.Context, *RequestHospcode) (*DoctorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DoctorList not implemented")
+}
+func (UnimplementedDoctorServiceServer) mustEmbedUnimplementedDoctorServiceServer() {}
+
+// UnsafeDoctorServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to DoctorServiceServer will
+// result in compilation errors.
+type UnsafeDoctorServiceServer interface {
+	mustEmbedUnimplementedDoctorServiceServer()
+}
+
+func RegisterDoctorServiceServer(s grpc.ServiceRegistrar, srv DoctorServiceServer) {
+	s.RegisterService(&DoctorService_ServiceDesc, srv)
+}
+
+func _DoctorService_DoctorList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestHospcode)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DoctorServiceServer).DoctorList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.DoctorService/DoctorList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DoctorServiceServer).DoctorList(ctx, req.(*RequestHospcode))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// DoctorService_ServiceDesc is the grpc.ServiceDesc for DoctorService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var DoctorService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.DoctorService",
+	HandlerType: (*DoctorServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "DoctorList",
+			Handler:    _DoctorService_DoctorList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

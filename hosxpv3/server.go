@@ -16,6 +16,7 @@ import (
 
 type server struct {
 	proto.UnimplementedEmrServiceServer
+	proto.UnimplementedDoctorServiceServer
 }
 
 type Person struct {
@@ -46,6 +47,7 @@ type Doctor struct {
 	RecordId  string `gorm:"primary_key" json: "record_id"`
 	Name      string `json:"name"`
 	LicenseNo string `json:"licenseno"`
+	Hospcode  string `json:"hospcode"`
 }
 
 func initDatabase() {
@@ -71,7 +73,8 @@ func main() {
 		panic(err)
 	}
 	srv := grpc.NewServer()
-	proto.RegisterEmrServiceServer(srv, &server{})
+	// proto.RegisterEmrServiceServer(srv, &server{})
+	proto.RegisterDoctorServiceServer(srv, &server{})
 	reflection.Register(srv)
 
 	if e := srv.Serve(lis); e != nil {
@@ -80,7 +83,7 @@ func main() {
 
 }
 
-func (s *server) PatientInfo(_ context.Context, request *proto.Request) (*proto.InfoResponse, error) {
+func (s *server) PatientInfo(_ context.Context, request *proto.RequestCid) (*proto.InfoResponse, error) {
 	cid := request.GetCid()
 	// fmt.Print(cid)
 
@@ -102,7 +105,29 @@ func (s *server) PatientInfo(_ context.Context, request *proto.Request) (*proto.
 
 }
 
-func (s *server) GetServices(_ context.Context, request *proto.Request) (*proto.ServiceResponse, error) {
+func (s *server) DoctorList(_ context.Context, request *proto.RequestHospcode) (*proto.DoctorResponse, error) {
+	hospcode := request.GetHospcode()
+	// fmt.Print(cid)
+
+	db := database.DBConn
+
+	db.SingularTable(true)
+
+	doctor := []*proto.DoctorResponse_Doctor{}
+
+	res := db.Table("doctor").Where(&Doctor{Hospcode: hospcode}).Find(&doctor)
+
+	if res.Error != nil {
+		fmt.Println(res.Error)
+	}
+
+	return &proto.DoctorResponse{
+		Results: doctor,
+	}, nil
+
+}
+
+func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*proto.ServiceResponse, error) {
 	cid := request.GetCid()
 	// fmt.Print(cid)
 
