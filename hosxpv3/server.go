@@ -54,63 +54,41 @@ func main() {
 
 func (s *server) PatientInfo(_ context.Context, request *proto.RequestCid) (*proto.InfoResponse, error) {
 	cid := request.GetCid()
-	// fmt.Print(cid)
-
 	db := database.DBConn
-
 	db.SingularTable(true)
-
 	person := []*proto.InfoResponse_Info{}
-
 	res := db.Raw(`
 	select gw_record_id,gw_hospcode,patient_hn,cid,pname,fname,lname,birthdate from hosxpv3_person
 	where cid=?`, cid).Scan(&person)
-
-	// res := db.Table("hosxpv3_person").Where(&Person{Cid: cid}).Find(&person)
-
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
-
 	return &proto.InfoResponse{
 		Results: person,
 	}, nil
-
 }
 
 func (s *server) DoctorList(_ context.Context, request *proto.RequestHospcode) (*proto.DoctorResponse, error) {
 	hospcode := request.GetHospcode()
-	// fmt.Print(cid)
-
 	db := database.DBConn
-
 	db.SingularTable(true)
-
 	doctor := []*proto.DoctorResponse_Doctor{}
 	res := db.Raw(`
 	select gw_record_id,gw_hospcode,name,licenseno as license_no,cid from hosxpv3_doctor
 	where gw_hospcode=?`, hospcode).Scan(&doctor)
-
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
-
 	return &proto.DoctorResponse{
 		Results: doctor,
 	}, nil
-
 }
 
 func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*proto.ServiceResponse, error) {
 	cid := request.GetCid()
-	// fmt.Print(cid)
-
 	db := database.DBConn
-
 	db.SingularTable(true)
-
 	services := []*proto.ServiceResponse_Service{}
-
 	res := db.Raw(`
 	select 
 	o.gw_record_id, o.hn, o.hospcode, 
@@ -123,30 +101,20 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 	where p.cid=?
 	and LENGTH(o.vstdate) > 0
 	order by o.vstdate, o.vsttime desc`, cid).Scan(&services)
-
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
-
 	return &proto.ServiceResponse{
 		Services: services,
 	}, nil
-
 }
 
 func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) (*proto.ScreeningResponse, error) {
-	// hn := request.GetHn()
-	// vn := request.GetVn()
 	hospcode := request.GetHospcode()
-	// fmt.Print(cid)
 	fmt.Print(hospcode)
-
 	db := database.DBConn
-
 	db.SingularTable(true)
-
 	screenings := []*proto.ScreeningResponse_Screening{}
-
 	res := db.Raw(`
 	SELECT
 		d.gw_record_id,
@@ -164,14 +132,10 @@ func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) 
 		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = d.gw_hospcode
 		LEFT JOIN MASTER.icd10 AS i ON i.diagcode = d.icd10
 		WHERE d.gw_hospcode=?`, hospcode).Scan(&screenings)
-	// WHERE d.hn=? and d.vn=? and d.gw_hospcode=?`, hn, vn, hospcode).Scan(&services)
-
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
-
 	return &proto.ScreeningResponse{
 		Screenings: screenings,
 	}, nil
-
 }
