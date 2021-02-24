@@ -11,9 +11,9 @@ message RequestHospcode {
 }
 
 message RequestPatient {
-  string hn = 1;
-  string vn = 2;
-  string hospcode = 3;
+  // string hn = 1;
+  // string vn = 2;
+  string hospcode = 1;
 }
 
 message InfoResponse {
@@ -58,35 +58,25 @@ message DoctorResponse {
 
 message ScreeningResponse {
   message Screening {
-    string hn = 1;
-    string vn = 2;
-    string vstdate = 3;
-    string vsttime = 4;
-    string hospmain = 5;
-    string hospsub = 6;
+    string gw_record_id = 1;
+    string hn = 2;
+    string vn = 3;
+    string vstdate = 4;
+    string vsttime = 5;
+    string hospname = 6;
+    string gw_hospcode = 7;
+    string diagename = 8;
+    string diagtname = 9;
   }
-}
-
-message DiagnosisResponse {
-  message Diagnosis {
-    string hn = 1;
-    string vn = 2;
-    string vstdate = 3;
-    string vsttime = 4;
-    string hospmain = 5;
-    string hospsub = 6;
-  }
+  repeated Screening screenings = 2;
 }
 
 service EmrService {
   rpc PatientInfo(RequestCid) returns (InfoResponse) {}
   rpc GetServices(RequestCid) returns (ServiceResponse) {}
+  rpc GetScreening(RequestPatient) returns (ScreeningResponse) {}
 }
 
 service DoctorService {
   rpc DoctorList(RequestHospcode) returns (DoctorResponse) {}
-}
-
-service PatientService {
-  rpc ScreeningList(RequestPatient) returns (ScreeningResponse) {}
 }

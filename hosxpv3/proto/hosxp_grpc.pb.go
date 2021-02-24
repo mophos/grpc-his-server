@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type EmrServiceClient interface {
 	PatientInfo(ctx context.Context, in *RequestCid, opts ...grpc.CallOption) (*InfoResponse, error)
 	GetServices(ctx context.Context, in *RequestCid, opts ...grpc.CallOption) (*ServiceResponse, error)
+	GetScreening(ctx context.Context, in *RequestPatient, opts ...grpc.CallOption) (*ScreeningResponse, error)
 }
 
 type emrServiceClient struct {
@@ -48,12 +49,22 @@ func (c *emrServiceClient) GetServices(ctx context.Context, in *RequestCid, opts
 	return out, nil
 }
 
+func (c *emrServiceClient) GetScreening(ctx context.Context, in *RequestPatient, opts ...grpc.CallOption) (*ScreeningResponse, error) {
+	out := new(ScreeningResponse)
+	err := c.cc.Invoke(ctx, "/proto.EmrService/GetScreening", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EmrServiceServer is the server API for EmrService service.
 // All implementations must embed UnimplementedEmrServiceServer
 // for forward compatibility
 type EmrServiceServer interface {
 	PatientInfo(context.Context, *RequestCid) (*InfoResponse, error)
 	GetServices(context.Context, *RequestCid) (*ServiceResponse, error)
+	GetScreening(context.Context, *RequestPatient) (*ScreeningResponse, error)
 	mustEmbedUnimplementedEmrServiceServer()
 }
 
@@ -66,6 +77,9 @@ func (UnimplementedEmrServiceServer) PatientInfo(context.Context, *RequestCid) (
 }
 func (UnimplementedEmrServiceServer) GetServices(context.Context, *RequestCid) (*ServiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetServices not implemented")
+}
+func (UnimplementedEmrServiceServer) GetScreening(context.Context, *RequestPatient) (*ScreeningResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetScreening not implemented")
 }
 func (UnimplementedEmrServiceServer) mustEmbedUnimplementedEmrServiceServer() {}
 
@@ -116,6 +130,24 @@ func _EmrService_GetServices_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EmrService_GetScreening_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestPatient)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmrServiceServer).GetScreening(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.EmrService/GetScreening",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmrServiceServer).GetScreening(ctx, req.(*RequestPatient))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EmrService_ServiceDesc is the grpc.ServiceDesc for EmrService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +162,10 @@ var EmrService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetServices",
 			Handler:    _EmrService_GetServices_Handler,
+		},
+		{
+			MethodName: "GetScreening",
+			Handler:    _EmrService_GetScreening_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
