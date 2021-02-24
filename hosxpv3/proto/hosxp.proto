@@ -1,8 +1,13 @@
 syntax = "proto3";
 package proto;
 option go_package = "./proto";
-message Request {
+
+message RequestCid {
   string cid = 1;
+}
+
+message RequestHospcode {
+  string hospcode = 1;
 }
 
 message InfoResponse {
@@ -16,9 +21,7 @@ message InfoResponse {
   string lname = 7;
   string birthdate = 8;
   }
-
   repeated Info results = 2;
-
 }
 
 message ServiceResponse {
@@ -34,12 +37,19 @@ message ServiceResponse {
   string spclty = 9;
   string hospname = 10;
   }
-
   repeated Service services = 2;
+}
 
+message DoctorResponse {
+  message Doctor {
+    string name = 1;
+    string licenseNo = 2;
+    string cid= 3 ;
+  }
 }
 
 service EmrService {
-  rpc PatientInfo(Request) returns (InfoResponse) {}
-  rpc GetServices(Request) returns (ServiceResponse) {}
+  rpc PatientInfo(RequestCid) returns (InfoResponse) {}
+  rpc GetServices(RequestCid) returns (ServiceResponse) {}
+  rpc DoctorList(RequestHospcode) returns (DoctorResponse) {}
 }
