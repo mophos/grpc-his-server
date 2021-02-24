@@ -22,9 +22,9 @@ message RequestHospcode {
 }
 
 message RequestPatient {
-  // string hn = 1;
-  // string vn = 2;
-  string hospcode = 1;
+  string hn = 1;
+  string vn = 2;
+  string hospcode = 3;
 }
 
 message InfoResponse {
@@ -38,7 +38,7 @@ message InfoResponse {
   string lname = 7;
   string birthdate = 8;
   }
-  repeated Info results = 2;
+  repeated Info Results = 2;
 }
 
 message ServiceResponse {
@@ -68,6 +68,21 @@ message DoctorResponse {
   repeated Doctor Results = 2;
 }
 
+message DiagnosisResponse {
+  message Diagnosis {
+    string gw_record_id = 1;
+    string gw_hospcode = 2;
+    string hn = 3;
+    string vn = 4;
+    string vstdate = 5;
+    string vsttime = 6;
+    string hospname = 7;
+    string diagename = 8;
+    string diagtname = 9;
+  }
+  repeated Diagnosis Results = 2;
+}
+
 message ClinicResponse {
   message Clinic {
     string gw_record_id = 1;
@@ -87,8 +102,6 @@ message ScreeningResponse {
     string vstdate = 5;
     string vsttime = 6;
     string hospname = 7;
-    string diagename = 8;
-    string diagtname = 9;
   }
   repeated Screening Results = 2;
 }
