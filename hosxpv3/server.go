@@ -42,12 +42,18 @@ type Service struct {
 	Hospname string `json:"hospname"`
 }
 
+type Doctor struct {
+	RecordId  string `gorm:"primary_key" json: "record_id"`
+	Name      string `json:"name"`
+	LicenseNo string `json:"licenseno"`
+}
+
 func initDatabase() {
 	var err error
 	user := os.Getenv("USER")
 	pass := os.Getenv("PASS")
 
-	database.DBConn, err = gorm.Open("mysql", user+":"+pass+"@tcp(203.157.103.125:3306)/hosxp?charset=utf8&parseTime=True")
+	database.DBConn, err = gorm.Open("mysql", user+":"+pass+"@tcp(127.0.0.1:3309)/hosxpv3?charset=utf8&parseTime=True")
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to connect database")
