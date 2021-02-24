@@ -33,9 +33,9 @@ message InfoResponse {
 message ServiceResponse {
   message Service {
   string gw_record_id = 1;
-  string hn = 2;
-  string vn = 3;
-  string gw_hospcode = 4;
+  string gw_hospcode = 2;
+  string hn = 3;
+  string vn = 4;
   string vstdate = 5;
   string vsttime = 6;
   string pttype = 7;
@@ -49,9 +49,10 @@ message ServiceResponse {
 message DoctorResponse {
   message Doctor {
     string gw_record_id = 1;
-    string name = 2;
-    string licenseNo = 3;
-    string cid= 4 ;
+    string gw_hospcode = 2;
+    string name = 3;
+    string license_no = 4;
+    string cid= 5 ;
   }
   repeated Doctor Results = 2;
 }
@@ -59,12 +60,12 @@ message DoctorResponse {
 message ScreeningResponse {
   message Screening {
     string gw_record_id = 1;
-    string hn = 2;
-    string vn = 3;
-    string vstdate = 4;
-    string vsttime = 5;
-    string hospname = 6;
-    string gw_hospcode = 7;
+    string gw_hospcode = 2;
+    string hn = 3;
+    string vn = 4;
+    string vstdate = 5;
+    string vsttime = 6;
+    string hospname = 7;
     string diagename = 8;
     string diagtname = 9;
   }

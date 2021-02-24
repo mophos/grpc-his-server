@@ -19,49 +19,6 @@ type server struct {
 	proto.UnimplementedDoctorServiceServer
 }
 
-type Person struct {
-	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
-	GwHospcode string `json:"gw_hospcode"`
-	PatientHn  string `json:"patient_hn"`
-	Cid        string `json:"cid"`
-	Pname      string `json:"pname"`
-	Fname      string `json:"fname"`
-	Lname      string `json:"lname"`
-	Birthdate  string `json:"birthdate"`
-}
-
-type Service struct {
-	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
-	GwHospcode string `json:"gw_hospcode"`
-	Hn         string `json:"hn"`
-	Vn         string `json:"vn"`
-	Vstdate    string `json:"vstdate"`
-	Vsttime    string `json:"vsttime"`
-	Pttype     string `json:"pttype"`
-	Pttypeno   string `json:"pttypeno"`
-	Spclty     string `json:"spclty"`
-	Hospname   string `json:"hospname"`
-}
-
-type Doctor struct {
-	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
-	Name       string `json:"name"`
-	LicenseNo  string `json:"licenseno"`
-	GwHospcode string `json:"gw_hospcode"`
-}
-
-type Screening struct {
-	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
-	Hn         string `json:"hn"`
-	Vn         string `json:"vn"`
-	Vstdate    string `json:"vstdate"`
-	Vsttime    string `json:"vsttime"`
-	Hospname   string `json:"hospname"`
-	GwHospcode string `json:"gw_hospcode"`
-	Diagename  string `json:"diagename"`
-	Diagtname  string `json:"diagtname"`
-}
-
 func initDatabase() {
 	var err error
 	user := os.Getenv("USER")
@@ -80,7 +37,7 @@ func main() {
 	initDatabase()
 	defer database.DBConn.Close()
 
-	lis, err := net.Listen("tcp", ":4041")
+	lis, err := net.Listen("tcp", ":4042")
 	if err != nil {
 		panic(err)
 	}
@@ -130,10 +87,8 @@ func (s *server) DoctorList(_ context.Context, request *proto.RequestHospcode) (
 	db.SingularTable(true)
 
 	doctor := []*proto.DoctorResponse_Doctor{}
-
-	// res := db.Table("doctor").Where(&Doctor{GwHospcode: hospcode}).Find(&doctor)
 	res := db.Raw(`
-	select * from doctor
+	select gw_record_id,gw_hospcode,name,licenseno as license_no,cid from hosxpv3_doctor
 	where gw_hospcode=?`, hospcode).Scan(&doctor)
 
 	if res.Error != nil {
@@ -184,6 +139,7 @@ func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) 
 	// vn := request.GetVn()
 	hospcode := request.GetHospcode()
 	// fmt.Print(cid)
+	fmt.Print(hospcode)
 
 	db := database.DBConn
 
@@ -208,7 +164,6 @@ func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) 
 		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = d.gw_hospcode
 		LEFT JOIN MASTER.icd10 AS i ON i.diagcode = d.icd10
 		WHERE d.gw_hospcode=?`, hospcode).Scan(&screenings)
-	fmt.Print(hospcode)
 	// WHERE d.hn=? and d.vn=? and d.gw_hospcode=?`, hn, vn, hospcode).Scan(&services)
 
 	if res.Error != nil {
