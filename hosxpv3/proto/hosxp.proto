@@ -57,8 +57,8 @@ message DoctorResponse {
   repeated Doctor Results = 2;
 }
 
-message ScreeningResponse {
-  message Screening {
+message DiagnosisResponse {
+  message Diagnosis {
     string gw_record_id = 1;
     string gw_hospcode = 2;
     string hn = 3;
@@ -69,12 +69,26 @@ message ScreeningResponse {
     string diagename = 8;
     string diagtname = 9;
   }
+  repeated Diagnosis diags = 2;
+}
+
+message ScreeningResponse {
+  message Screening {
+    string gw_record_id = 1;
+    string gw_hospcode = 2;
+    string hn = 3;
+    string vn = 4;
+    string vstdate = 5;
+    string vsttime = 6;
+    string hospname = 7;
+  }
   repeated Screening screenings = 2;
 }
 
 service EmrService {
   rpc PatientInfo(RequestCid) returns (InfoResponse) {}
   rpc GetServices(RequestCid) returns (ServiceResponse) {}
+  rpc GetDiagnosis(RequestPatient) returns (DiagnosisResponse) {}
   rpc GetScreening(RequestPatient) returns (ScreeningResponse) {}
 }
 

@@ -120,10 +120,40 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 }
 
 func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) (*proto.ScreeningResponse, error) {
+	hn := request.GetHn()
+	vn := request.GetVn()
 	hospcode := request.GetHospcode()
 	db := database.DBConn
 	db.SingularTable(true)
 	screenings := []*proto.ScreeningResponse_Screening{}
+	res := db.Raw(`
+	SELECT
+		o.gw_record_id,
+		o.gw_hospcode,
+		o.hn,
+		o.vn,
+		o.vstdate,
+		o.vsttime,
+		h.hospname 
+	FROM
+		hosxpv3_ovst AS o
+		JOIN MASTER.b_hospitals AS h ON h.hospcode = o.gw_hospcode
+	WHERE o.gw_hospcode=? and o.hn=? and o.vn=?`, hospcode, hn, vn).Scan(&screenings)
+	if res.Error != nil {
+		fmt.Println(res.Error)
+	}
+	return &proto.ScreeningResponse{
+		Screening: screenings,
+	}, nil
+}
+
+func (s *server) GetDiagnosis(_ context.Context, request *proto.RequestPatient) (*proto.DiagnosisResponse, error) {
+	hn := request.GetHn()
+	vn := request.GetVn()
+	hospcode := request.GetHospcode()
+	db := database.DBConn
+	db.SingularTable(true)
+	diags := []*proto.DiagnosisResponse_Diagnosis{}
 	res := db.Raw(`
 	SELECT
 		d.gw_record_id,
@@ -138,13 +168,13 @@ func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) 
 		i.diagtname 
 	FROM
 		hosxpv3.hosxpv3_ovstdiag d
-		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = d.gw_hospcode
+		JOIN MASTER.b_hospitals AS h ON h.hospcode = d.gw_hospcode
 		LEFT JOIN MASTER.icd10 AS i ON i.diagcode = d.icd10
-		WHERE d.gw_hospcode=?`, hospcode).Scan(&screenings)
+		WHERE d.gw_hospcode=? and d.hn=? and d.vn=?`, hospcode, hn, vn).Scan(&diags)
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
-	return &proto.ScreeningResponse{
-		Screenings: screenings,
+	return &proto.DiagnosisResponse{
+		Diags: diags,
 	}, nil
 }
