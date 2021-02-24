@@ -1,0 +1,45 @@
+syntax = "proto3";
+package proto;
+option go_package = "./proto";
+message Request {
+  string cid = 1;
+}
+
+message InfoResponse {
+  message Info {
+  string record_id = 1;
+  string patient_hn = 2;
+  string cid = 3;
+  string hospcode = 4;
+  string pname = 5;
+  string fname = 6;
+  string lname = 7;
+  string birthdate = 8;
+  }
+
+  repeated Info results = 2;
+
+}
+
+message ServiceResponse {
+  message Service {
+  string record_id = 1;
+  string hn = 2;
+  string vn = 3;
+  string hospcode = 4;
+  string vstdate = 5;
+  string vsttime = 6;
+  string pttype = 7;
+  string pttypeno = 8;
+  string spclty = 9;
+  string hospname = 10;
+  }
+
+  repeated Service services = 2;
+
+}
+
+service EmrService {
+  rpc PatientInfo(Request) returns (InfoResponse) {}
+  rpc GetServices(Request) returns (ServiceResponse) {}
+}
