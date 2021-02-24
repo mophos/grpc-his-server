@@ -267,3 +267,68 @@ func (s *server) GetLab(_ context.Context, request *proto.RequestPatient) (*prot
 		Results: data,
 	}, nil
 }
+
+func (s *server) GetVaccine(_ context.Context, request *proto.RequestPatient) (*proto.VaccineResponse, error) {
+	hn := request.GetHn()
+	vn := request.GetVn()
+	hospcode := request.GetHospcode()
+	db := database.DBConn
+	db.SingularTable(true)
+	data := []*proto.VaccineResponse_Vaccine{}
+	res := db.Raw(`
+	SELECT
+		ov.gw_record_id,
+		ov.gw_hospcode,
+		h.hospname,
+		o.hn,
+		o.vn,
+		ov.vaccine_note,
+		ov.abnormal_note
+	FROM
+		hosxpv3.ovst_vaccine AS ov
+		LEFT JOIN hosxpv3.hosxpv3_ovst AS o ON o.gw_hospcode = ov.gw_hospcode 
+		AND o.vn = ov.vn
+		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = ov.gw_hospcode
+		LEFT JOIN hosxpv3.person_epi_vaccine AS pev ON pev.gw_hospcode = ov.gw_hospcode 
+		AND pev.person_epi_vaccine_id = ov.person_vaccine_id
+	WHERE
+		o.gw_hospcode=? and o.hn=? and o.vn=?`, hospcode, hn, vn).Scan(&data)
+	if res.Error != nil {
+		fmt.Println(res.Error)
+	}
+	return &proto.VaccineResponse{
+		Results: data,
+	}, nil
+}
+
+func (s *server) GetDrug(_ context.Context, request *proto.RequestPatient) (*proto.DrugResponse, error) {
+	hn := request.GetHn()
+	vn := request.GetVn()
+	hospcode := request.GetHospcode()
+	db := database.DBConn
+	db.SingularTable(true)
+	data := []*proto.DrugResponse_Drug{}
+	res := db.Raw(`
+	SELECT
+		op.gw_record_id,
+		op.gw_hospcode,
+		op.hn,
+		op.vn,
+		op.icode,
+		op.qty,
+		op.unitprice,
+		op.vstdate,
+		op.vsttime,
+		h.hospname
+	FROM
+		hosxpv3.hosxpv3_opitemrece AS op
+		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = op.gw_hospcode
+	WHERE
+		op.gw_hospcode=? and op.hn=? and op.vn=?`, hospcode, hn, vn).Scan(&data)
+	if res.Error != nil {
+		fmt.Println(res.Error)
+	}
+	return &proto.DrugResponse{
+		Results: data,
+	}, nil
+}
