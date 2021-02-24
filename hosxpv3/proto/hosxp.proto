@@ -18,10 +18,10 @@ message RequestPatient {
 
 message InfoResponse {
   message Info {
-  string record_id = 1;
+  string gw_record_id = 1;
   string patient_hn = 2;
   string cid = 3;
-  string hospcode = 4;
+  string gw_hospcode = 4;
   string pname = 5;
   string fname = 6;
   string lname = 7;
@@ -32,10 +32,10 @@ message InfoResponse {
 
 message ServiceResponse {
   message Service {
-  string record_id = 1;
+  string gw_record_id = 1;
   string hn = 2;
   string vn = 3;
-  string hospcode = 4;
+  string gw_hospcode = 4;
   string vstdate = 5;
   string vsttime = 6;
   string pttype = 7;
@@ -48,9 +48,10 @@ message ServiceResponse {
 
 message DoctorResponse {
   message Doctor {
-    string name = 1;
-    string licenseNo = 2;
-    string cid= 3 ;
+    string gw_record_id = 1;
+    string name = 2;
+    string licenseNo = 3;
+    string cid= 4 ;
   }
   repeated Doctor Results = 2;
 }

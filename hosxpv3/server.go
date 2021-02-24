@@ -20,34 +20,34 @@ type server struct {
 }
 
 type Person struct {
-	RecordId  string `gorm:"primary_key" json: "record_id"`
-	PatientHn string `json:"patient_hn"`
-	Cid       string `json:"cid"`
-	Hospcode  string `json:"hospcode"`
-	Pname     string `json:"pname"`
-	Fname     string `json:"fname"`
-	Lname     string `json:"lname"`
-	Birthdate string `json:"birthdate"`
+	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
+	GwHospcode string `json:"gw_hospcode"`
+	PatientHn  string `json:"patient_hn"`
+	Cid        string `json:"cid"`
+	Pname      string `json:"pname"`
+	Fname      string `json:"fname"`
+	Lname      string `json:"lname"`
+	Birthdate  string `json:"birthdate"`
 }
 
 type Service struct {
-	RecordId string `gorm:"primary_key" json: "record_id"`
-	Hn       string `json:"hn"`
-	Hospcode string `json:"hospcode"`
-	Vn       string `json:"vn"`
-	Vstdate  string `json:"vstdate"`
-	Vsttime  string `json:"vsttime"`
-	Pttype   string `json:"pttype"`
-	Pttypeno string `json:"pttypeno"`
-	Spclty   string `json:"spclty"`
-	Hospname string `json:"hospname"`
+	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
+	GwHospcode string `json:"gw_hospcode"`
+	Hn         string `json:"hn"`
+	Vn         string `json:"vn"`
+	Vstdate    string `json:"vstdate"`
+	Vsttime    string `json:"vsttime"`
+	Pttype     string `json:"pttype"`
+	Pttypeno   string `json:"pttypeno"`
+	Spclty     string `json:"spclty"`
+	Hospname   string `json:"hospname"`
 }
 
 type Doctor struct {
-	RecordId  string `gorm:"primary_key" json: "record_id"`
-	Name      string `json:"name"`
-	LicenseNo string `json:"licenseno"`
-	Hospcode  string `json:"hospcode"`
+	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
+	Name       string `json:"name"`
+	LicenseNo  string `json:"licenseno"`
+	GwHospcode string `json:"gw_hospcode"`
 }
 
 func initDatabase() {
@@ -68,12 +68,12 @@ func main() {
 	initDatabase()
 	defer database.DBConn.Close()
 
-	lis, err := net.Listen("tcp", ":4040")
+	lis, err := net.Listen("tcp", ":4041")
 	if err != nil {
 		panic(err)
 	}
 	srv := grpc.NewServer()
-	// proto.RegisterEmrServiceServer(srv, &server{})
+	proto.RegisterEmrServiceServer(srv, &server{})
 	proto.RegisterDoctorServiceServer(srv, &server{})
 	reflection.Register(srv)
 
@@ -93,7 +93,11 @@ func (s *server) PatientInfo(_ context.Context, request *proto.RequestCid) (*pro
 
 	person := []*proto.InfoResponse_Info{}
 
-	res := db.Table("person").Where(&Person{Cid: cid}).Find(&person)
+	res := db.Raw(`
+	select gw_record_id,gw_hospcode,patient_hn,cid,pname,fname,lname,birthdate from hosxpv3_person
+	where cid=?`, cid).Scan(&person)
+
+	// res := db.Table("hosxpv3_person").Where(&Person{Cid: cid}).Find(&person)
 
 	if res.Error != nil {
 		fmt.Println(res.Error)
@@ -115,7 +119,10 @@ func (s *server) DoctorList(_ context.Context, request *proto.RequestHospcode) (
 
 	doctor := []*proto.DoctorResponse_Doctor{}
 
-	res := db.Table("doctor").Where(&Doctor{Hospcode: hospcode}).Find(&doctor)
+	// res := db.Table("doctor").Where(&Doctor{GwHospcode: hospcode}).Find(&doctor)
+	res := db.Raw(`
+	select * from doctor
+	where gw_hospcode=?`, hospcode).Scan(&doctor)
 
 	if res.Error != nil {
 		fmt.Println(res.Error)
@@ -139,12 +146,12 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 
 	res := db.Raw(`
 	select 
-	o.record_id, o.hn, o.hospcode, 
+	o.gw_record_id, o.hn, o.hospcode, 
 	o.vn, o.vstdate, o.vsttime, 
 	o.pttype, o.pttypeno, o.spclty, 
 	h.hospname 
 	from opd_visit as o
-	inner join person as p on p.patient_hn=o.hn and p.hospcode=o.hospcode
+	inner join hoscpperson as p on p.patient_hn=o.hn and p.hospcode=o.hospcode
 	inner join b_hospitals as h on h.hospcode=o.hospcode
 	where p.cid=?
 	and LENGTH(o.vstdate) > 0
