@@ -17,7 +17,7 @@ import (
 
 type server struct {
 	proto.UnimplementedEmrServiceServer
-	proto.UnimplementedDoctorServiceServer
+	proto.UnimplementedMasterServiceServer
 }
 
 func initDatabase() {
@@ -53,7 +53,7 @@ func main() {
 	}
 	srv := grpc.NewServer()
 	proto.RegisterEmrServiceServer(srv, &server{})
-	proto.RegisterDoctorServiceServer(srv, &server{})
+	proto.RegisterMasterServiceServer(srv, &server{})
 	reflection.Register(srv)
 
 	if e := srv.Serve(lis); e != nil {
@@ -66,15 +66,15 @@ func (s *server) PatientInfo(_ context.Context, request *proto.RequestCid) (*pro
 	cid := request.GetCid()
 	db := database.DBConn
 	db.SingularTable(true)
-	person := []*proto.InfoResponse_Info{}
+	data := []*proto.InfoResponse_Info{}
 	res := db.Raw(`
 	select gw_record_id,gw_hospcode,patient_hn,cid,pname,fname,lname,birthdate from hosxpv3_person
-	where cid=?`, cid).Scan(&person)
+	where cid=?`, cid).Scan(&data)
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
 	return &proto.InfoResponse{
-		Results: person,
+		Results: data,
 	}, nil
 }
 
@@ -82,15 +82,15 @@ func (s *server) DoctorList(_ context.Context, request *proto.RequestHospcode) (
 	hospcode := request.GetHospcode()
 	db := database.DBConn
 	db.SingularTable(true)
-	doctor := []*proto.DoctorResponse_Doctor{}
+	data := []*proto.DoctorResponse_Doctor{}
 	res := db.Raw(`
 	select gw_record_id,gw_hospcode,name,licenseno as license_no,cid from hosxpv3_doctor
-	where gw_hospcode=?`, hospcode).Scan(&doctor)
+	where gw_hospcode=?`, hospcode).Scan(&data)
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
 	return &proto.DoctorResponse{
-		Results: doctor,
+		Results: data,
 	}, nil
 }
 
@@ -98,7 +98,7 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 	cid := request.GetCid()
 	db := database.DBConn
 	db.SingularTable(true)
-	services := []*proto.ServiceResponse_Service{}
+	data := []*proto.ServiceResponse_Service{}
 	res := db.Raw(`
 	select 
 	o.gw_record_id, o.hn, o.hospcode, 
@@ -110,12 +110,12 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 	inner join b_hospitals as h on h.hospcode=o.hospcode
 	where p.cid=?
 	and LENGTH(o.vstdate) > 0
-	order by o.vstdate, o.vsttime desc`, cid).Scan(&services)
+	order by o.vstdate, o.vsttime desc`, cid).Scan(&data)
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
 	return &proto.ServiceResponse{
-		Services: services,
+		Results: data,
 	}, nil
 }
 
@@ -124,7 +124,7 @@ func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) 
 	fmt.Print(hospcode)
 	db := database.DBConn
 	db.SingularTable(true)
-	screenings := []*proto.ScreeningResponse_Screening{}
+	data := []*proto.ScreeningResponse_Screening{}
 	res := db.Raw(`
 	SELECT
 		d.gw_record_id,
@@ -141,11 +141,27 @@ func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) 
 		hosxpv3.hosxpv3_ovstdiag d
 		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = d.gw_hospcode
 		LEFT JOIN MASTER.icd10 AS i ON i.diagcode = d.icd10
-		WHERE d.gw_hospcode=?`, hospcode).Scan(&screenings)
+		WHERE d.gw_hospcode=?`, hospcode).Scan(&data)
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
 	return &proto.ScreeningResponse{
-		Screenings: screenings,
+		Results: data,
+	}, nil
+}
+
+func (s *server) ClinicList(_ context.Context, request *proto.RequestHospcode) (*proto.ClinicResponse, error) {
+	hospcode := request.GetHospcode()
+	fmt.Print(hospcode)
+	db := database.DBConn
+	db.SingularTable(true)
+	data := []*proto.ClinicResponse_Clinic{}
+	res := db.Raw(`
+	SELECT gw_record_id,gw_hospcode,depcode as clinic_code,department as clinic_name from hosxpv3_kskdepartment WHERE gw_hospcode=?`, hospcode).Scan(&data)
+	if res.Error != nil {
+		fmt.Println(res.Error)
+	}
+	return &proto.ClinicResponse{
+		Results: data,
 	}, nil
 }

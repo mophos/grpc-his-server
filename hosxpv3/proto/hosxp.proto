@@ -43,7 +43,7 @@ message ServiceResponse {
   string spclty = 9;
   string hospname = 10;
   }
-  repeated Service services = 2;
+  repeated Service Results = 2;
 }
 
 message DoctorResponse {
@@ -55,6 +55,16 @@ message DoctorResponse {
     string cid= 5 ;
   }
   repeated Doctor Results = 2;
+}
+
+message ClinicResponse {
+  message Clinic {
+    string gw_record_id = 1;
+    string gw_hospcode = 2;
+    string clinic_code = 3;
+    string clinic_name = 4;
+  }
+  repeated Clinic Results = 2;
 }
 
 message ScreeningResponse {
@@ -69,7 +79,7 @@ message ScreeningResponse {
     string diagename = 8;
     string diagtname = 9;
   }
-  repeated Screening screenings = 2;
+  repeated Screening Results = 2;
 }
 
 service EmrService {
@@ -78,6 +88,7 @@ service EmrService {
   rpc GetScreening(RequestPatient) returns (ScreeningResponse) {}
 }
 
-service DoctorService {
+service MasterService {
   rpc DoctorList(RequestHospcode) returns (DoctorResponse) {}
+  rpc ClinicList(RequestHospcode) returns (ClinicResponse) {}
 }
