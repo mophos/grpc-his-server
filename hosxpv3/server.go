@@ -159,3 +159,36 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 	}, nil
 
 }
+
+func (s *server) GetScreening(_ context.Context, request *proto.RequestCid) (*proto.ServiceResponse, error) {
+	cid := request.GetCid()
+	// fmt.Print(cid)
+
+	db := database.DBConn
+
+	db.SingularTable(true)
+
+	services := []*proto.ServiceResponse_Service{}
+
+	res := db.Raw(`
+	select 
+	o.record_id, o.hn, o.hospcode, 
+	o.vn, o.vstdate, o.vsttime, 
+	o.pttype, o.pttypeno, o.spclty, 
+	h.hospname 
+	from opd_visit as o
+	inner join person as p on p.patient_hn=o.hn and p.hospcode=o.hospcode
+	inner join b_hospitals as h on h.hospcode=o.hospcode
+	where p.cid=?
+	and LENGTH(o.vstdate) > 0
+	order by o.vstdate, o.vsttime desc`, cid).Scan(&services)
+
+	if res.Error != nil {
+		fmt.Println(res.Error)
+	}
+
+	return &proto.ServiceResponse{
+		Services: services,
+	}, nil
+
+}

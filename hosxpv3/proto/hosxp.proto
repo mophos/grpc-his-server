@@ -10,6 +10,12 @@ message RequestHospcode {
   string hospcode = 1;
 }
 
+message RequestPatient {
+  string hn = 1;
+  string vn = 2;
+  string hospcode = 3;
+}
+
 message InfoResponse {
   message Info {
   string record_id = 1;
@@ -49,6 +55,28 @@ message DoctorResponse {
   repeated Doctor Results = 2;
 }
 
+message ScreeningResponse {
+  message Screening {
+    string hn = 1;
+    string vn = 2;
+    string vstdate = 3;
+    string vsttime = 4;
+    string hospmain = 5;
+    string hospsub = 6;
+  }
+}
+
+message DiagnosisResponse {
+  message Diagnosis {
+    string hn = 1;
+    string vn = 2;
+    string vstdate = 3;
+    string vsttime = 4;
+    string hospmain = 5;
+    string hospsub = 6;
+  }
+}
+
 service EmrService {
   rpc PatientInfo(RequestCid) returns (InfoResponse) {}
   rpc GetServices(RequestCid) returns (ServiceResponse) {}
@@ -56,4 +84,8 @@ service EmrService {
 
 service DoctorService {
   rpc DoctorList(RequestHospcode) returns (DoctorResponse) {}
+}
+
+service PatientService {
+  rpc ScreeningList(RequestPatient) returns (ScreeningResponse) {}
 }
