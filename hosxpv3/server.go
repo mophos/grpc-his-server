@@ -43,13 +43,13 @@ type Service struct {
 	Hospname   string `json:"hospname"`
 }
 
-type Doctor struct {
-	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
-	GwHospcode string `json:"gw_hospcode"`
-	Name       string `json:"name"`
-	Licenseno  string `json:"license_no"`
-	Cid        string `json:"cid"`
-}
+// type Doctor struct {
+// 	GwRecordId string `gorm:"primary_key" json: "gw_record_id"`
+// 	GwHospcode string `json:"gw_hospcode"`
+// 	Name       string `json:"name"`
+// 	LicenseNo  string `json:"license_no"`
+// 	Cid        string `json:"cid"`
+// }
 
 func initDatabase() {
 	var err error
@@ -69,7 +69,7 @@ func main() {
 	initDatabase()
 	defer database.DBConn.Close()
 
-	lis, err := net.Listen("tcp", ":4041")
+	lis, err := net.Listen("tcp", ":4042")
 	if err != nil {
 		panic(err)
 	}
@@ -119,9 +119,8 @@ func (s *server) DoctorList(_ context.Context, request *proto.RequestHospcode) (
 	db.SingularTable(true)
 
 	doctor := []*proto.DoctorResponse_Doctor{}
-	// res := db.Table("doctor").Where(&Doctor{GwHospcode: hospcode}).Find(&doctor)
 	res := db.Raw(`
-	select gw_record_id,gw_hospcode,name,licenseno,cid from hosxpv3_doctor
+	select gw_record_id,gw_hospcode,name,licenseno as license_no,cid from hosxpv3_doctor
 	where gw_hospcode=?`, hospcode).Scan(&doctor)
 
 	if res.Error != nil {

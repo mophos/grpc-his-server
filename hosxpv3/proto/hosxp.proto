@@ -45,7 +45,7 @@ message DoctorResponse {
     string gw_record_id = 1;
     string gw_hospcode = 2;
     string name = 3;
-    string licenseno = 4;
+    string license_no = 4;
     string cid= 5 ;
   }
   repeated Doctor Results = 2;
