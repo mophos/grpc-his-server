@@ -47,7 +47,7 @@ func main() {
 	initDatabase()
 	defer database.DBConn.Close()
 
-	lis, err := net.Listen("tcp", ":4042")
+	lis, err := net.Listen("tcp", ":4041")
 	if err != nil {
 		panic(err)
 	}
