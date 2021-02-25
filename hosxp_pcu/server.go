@@ -68,7 +68,7 @@ func (s *server) PatientInfo(_ context.Context, request *proto.RequestCid) (*pro
 	db.SingularTable(true)
 	data := []*proto.InfoResponse_Info{}
 	res := db.Raw(`
-	select gw_record_id,gw_hospcode,patient_hn,cid,pname,fname,lname,birthdate from hosxpv4_person
+	select gw_record_id,gw_hospcode,patient_hn,cid,pname,fname,lname,birthdate from hosxp_pcu_person
 	where cid=?`, cid).Scan(&data)
 	if res.Error != nil {
 		fmt.Println(res.Error)
@@ -84,7 +84,7 @@ func (s *server) DoctorList(_ context.Context, request *proto.RequestHospcode) (
 	db.SingularTable(true)
 	data := []*proto.DoctorResponse_Doctor{}
 	res := db.Raw(`
-	select gw_record_id,gw_hospcode,name,licenseno as license_no,cid from hosxpv4_doctor
+	select gw_record_id,gw_hospcode,name,licenseno as license_no,cid from hosxp_pcu_doctor
 	where gw_hospcode=?`, hospcode).Scan(&data)
 	if res.Error != nil {
 		fmt.Println(res.Error)
@@ -136,7 +136,7 @@ func (s *server) GetScreening(_ context.Context, request *proto.RequestPatient) 
 		o.vsttime,
 		h.hospname 
 	FROM
-		hosxpv4_ovst AS o
+		hosxp_pcu_ovst AS o
 		JOIN MASTER.b_hospitals AS h ON h.hospcode = o.gw_hospcode
 	WHERE o.gw_hospcode=? and o.hn=? and o.vn=?`, hospcode, hn, vn).Scan(&data)
 	if res.Error != nil {
@@ -167,7 +167,7 @@ func (s *server) GetDiagnosis(_ context.Context, request *proto.RequestPatient) 
 		i.diagename,
 		i.diagtname 
 	FROM
-		hosxpv4.hosxpv4_ovstdiag d
+		hosxp_pcu.hosxp_pcu_ovstdiag d
 		JOIN MASTER.b_hospitals AS h ON h.hospcode = d.gw_hospcode
 		LEFT JOIN MASTER.icd10 AS i ON i.diagcode = d.icd10
 		WHERE d.gw_hospcode=? and d.hn=? and d.vn=?`, hospcode, hn, vn).Scan(&data)
@@ -186,7 +186,7 @@ func (s *server) ClinicList(_ context.Context, request *proto.RequestHospcode) (
 	db.SingularTable(true)
 	data := []*proto.ClinicResponse_Clinic{}
 	res := db.Raw(`
-	SELECT gw_record_id,gw_hospcode,depcode as clinic_code,department as clinic_name from hosxpv4_kskdepartment WHERE gw_hospcode=?`, hospcode).Scan(&data)
+	SELECT gw_record_id,gw_hospcode,depcode as clinic_code,department as clinic_name from hosxp_pcu_kskdepartment WHERE gw_hospcode=?`, hospcode).Scan(&data)
 	if res.Error != nil {
 		fmt.Println(res.Error)
 	}
@@ -215,10 +215,10 @@ func (s *server) GetProcedure(_ context.Context, request *proto.RequestPatient) 
 		i.diagename,
 		i.diagtname 
 	FROM
-		hosxpv4.hosxpv4_ovstdiag d
+		hosxp_pcu.hosxp_pcu_ovstdiag d
 		JOIN MASTER.b_hospitals AS h ON h.hospcode = d.gw_hospcode
 		LEFT JOIN MASTER.icd10 AS i ON i.diagcode = d.icd10
-		LEFT JOIN hosxpv4.hosxpv4_ovst AS o ON o.gw_hospcode = d.gw_hospcode 
+		LEFT JOIN hosxp_pcu.hosxp_pcu_ovst AS o ON o.gw_hospcode = d.gw_hospcode 
 		AND o.hn = d.hn 
 		AND o.vn = d.vn 
 	WHERE
@@ -253,8 +253,8 @@ func (s *server) GetLab(_ context.Context, request *proto.RequestPatient) (*prot
 		li.lab_items_unit,
 		li.lab_items_normal_value
 	FROM
-		hosxpv4.hosxpv4_lab_head AS lh
-		LEFT JOIN hosxpv4.hosxpv4_lab_order AS lo ON lo.lab_order_number = lh.lab_order_number
+		hosxp_pcu.hosxp_pcu_lab_head AS lh
+		LEFT JOIN hosxp_pcu.hosxp_pcu_lab_order AS lo ON lo.lab_order_number = lh.lab_order_number
 		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = lh.gw_hospcode
 		LEFT JOIN MASTER.b_lab_items AS li ON li.gw_hospcode = lh.gw_hospcode 
 		AND li.lab_items_code = lo.lab_items_code 
@@ -285,11 +285,11 @@ func (s *server) GetVaccine(_ context.Context, request *proto.RequestPatient) (*
 		ov.vaccine_note,
 		ov.abnormal_note
 	FROM
-		hosxpv4.ovst_vaccine AS ov
-		LEFT JOIN hosxpv4.hosxpv4_ovst AS o ON o.gw_hospcode = ov.gw_hospcode 
+		hosxp_pcu.ovst_vaccine AS ov
+		LEFT JOIN hosxp_pcu.hosxp_pcu_ovst AS o ON o.gw_hospcode = ov.gw_hospcode 
 		AND o.vn = ov.vn
 		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = ov.gw_hospcode
-		LEFT JOIN hosxpv4.person_epi_vaccine AS pev ON pev.gw_hospcode = ov.gw_hospcode 
+		LEFT JOIN hosxp_pcu.person_epi_vaccine AS pev ON pev.gw_hospcode = ov.gw_hospcode 
 		AND pev.person_epi_vaccine_id = ov.person_vaccine_id
 	WHERE
 		o.gw_hospcode=? and o.hn=? and o.vn=?`, hospcode, hn, vn).Scan(&data)
@@ -321,7 +321,7 @@ func (s *server) GetDrug(_ context.Context, request *proto.RequestPatient) (*pro
 		op.vsttime,
 		h.hospname
 	FROM
-		hosxpv4.hosxpv4_opitemrece AS op
+		hosxp_pcu.hosxp_pcu_opitemrece AS op
 		LEFT JOIN MASTER.b_hospitals AS h ON h.hospcode = op.gw_hospcode
 	WHERE
 		op.gw_hospcode=? and op.hn=? and op.vn=?`, hospcode, hn, vn).Scan(&data)
