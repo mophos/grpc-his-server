@@ -1,2 +1,2 @@
 .env
-proto/*.go
+# proto/*.go
