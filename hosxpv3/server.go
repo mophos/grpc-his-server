@@ -101,13 +101,13 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 	data := []*proto.ServiceResponse_Service{}
 	res := db.Raw(`
 	select 
-	o.gw_record_id, o.hn, o.hospcode, 
+	o.gw_record_id, o.hn, o.gw_hospcode, 
 	o.vn, o.vstdate, o.vsttime, 
 	o.pttype, o.pttypeno, o.spclty, 
-	h.hospname 
-	from opd_visit as o
-	inner join hoscpperson as p on p.patient_hn=o.hn and p.hospcode=o.hospcode
-	inner join b_hospitals as h on h.hospcode=o.hospcode
+	h.hospname,p.cid 
+	from hosxpv3.hosxpv3_ovst as o
+	inner  join hosxpv3.hosxpv3_person as p on p.patient_hn=o.hn 
+	left  join master.b_hospitals as h on h.hospcode=o.gw_hospcode
 	where p.cid=?
 	and LENGTH(o.vstdate) > 0
 	order by o.vstdate, o.vsttime desc`, cid).Scan(&data)
