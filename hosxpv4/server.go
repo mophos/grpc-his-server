@@ -105,8 +105,8 @@ func (s *server) GetServices(_ context.Context, request *proto.RequestCid) (*pro
 	o.vn, o.vstdate, o.vsttime, 
 	o.pttype, o.pttypeno, o.spclty, 
 	h.hospname,p.cid 
-	from hosxpv3.hosxpv3_ovst as o
-	inner  join hosxpv3.hosxpv3_person as p on p.patient_hn=o.hn 
+	from hosxpv4.hosxpv4_ovst as o
+	inner  join hosxpv4.hosxpv4_person as p on p.patient_hn=o.hn 
 	left  join master.b_hospitals as h on h.hospcode=o.gw_hospcode
 	where p.cid=?
 	and LENGTH(o.vstdate) > 0
