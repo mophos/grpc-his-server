@@ -39,7 +39,7 @@ func initDatabase() {
 
 func main() {
 
-	err := godotenv.Load(".env")
+	err := godotenv.Load("conf.env")
 	if err != nil {
 		fmt.Println("Error loading .env file")
 	}
