@@ -39,7 +39,7 @@ func initDatabase() {
 
 func main() {
 
-	err := godotenv.Load(".env")
+	err := godotenv.Load("conf.env")
 	if err != nil {
 		fmt.Println("Error loading .env file")
 	}
@@ -47,7 +47,7 @@ func main() {
 	initDatabase()
 	defer database.DBConn.Close()
 
-	lis, err := net.Listen("tcp", ":4043")
+	lis, err := net.Listen("tcp", ":4040")
 	if err != nil {
 		panic(err)
 	}
