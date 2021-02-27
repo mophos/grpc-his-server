@@ -1,0 +1,26 @@
+version: "3"
+services:
+ grpc-server-hosxpv3:
+    image: "grpc-server-hosxpv3"
+    container_name: "grpc-server-hosxpv3"
+    ports:
+      - 3000:4040
+    volumes:
+      - ./hosxpv3.env:/app/conf.env
+    restart: always
+ grpc-server-hosxpv4:
+    image: "grpc-server-hosxpv4"
+    container_name: "grpc-server-hosxpv4"
+    ports:
+      - 3001:4040
+    volumes:
+      - ./hosxpv4.env:/app/conf.env
+    restart: always
+ grpc-server-hosxppcu:
+    image: "grpc-server-hosxppcu"
+    container_name: "grpc-server-hosxppcu"
+    ports:
+      - 3002:4040
+    volumes:
+      - ./hosxppcu.env:/app/conf.env
+    restart: always
